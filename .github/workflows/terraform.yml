@@ -106,7 +106,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: plan_${{ github.event.inputs.customer }}.out
-          path: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+          path: ${{ env.TERRAFORM_WORKING_DIRECTORY }}/plan_${{ github.event.inputs.customer }}.out
 
   terraform_apply:
     needs: [terraform_plan]
@@ -140,6 +140,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: plan_${{ github.event.inputs.customer }}.out
+          path: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
 
       - name: Terraform Apply
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
