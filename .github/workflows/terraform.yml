@@ -56,8 +56,22 @@ jobs:
       - name: Terraform Validate
         # ensures that terraform validate runs regardless of the success or failure of the previous step
         if: success() || failure()
-        run: terraform validate
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        run: terraform validate
+
+      - name: Terraform Workspace
+        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        run: |  
+          set +e  # Disable exit on error temporarily
+          terraform workspace new customer  # Try to create workspace
+          terraform workspace select customer
+          exit_code=$?
+          set -e  # Re-enable exit on error
+          if [ $exit_code -ne 0 ]; then
+            echo "Workspace 'customer' already exists, selecting..."
+          else
+            echo "Workspace 'customer' created and selected."
+          fi
 
       - name: Terraform Plan
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
