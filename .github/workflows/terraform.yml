@@ -5,8 +5,11 @@ on:
     branches:
       - "main"
     paths:
-      - "src/**"
+      - "src/terraform/**"
       - ".github/workflows/**"
+
+env:
+  TERRAFORM_WORKING_DIRECTORY: src/terraform
 
 jobs:
   terraform:
