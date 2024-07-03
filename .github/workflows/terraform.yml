@@ -78,3 +78,8 @@ jobs:
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: |
           terraform plan -out="plan_customer.out" -var-file="terraform.tfvars"
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        run: |
+            terraform apply "plan_customer.out"
