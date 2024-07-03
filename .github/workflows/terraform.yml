@@ -15,6 +15,7 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
 
+    # Permissions for OIDC
     permissions:
       id-token: write
       contents: read
@@ -53,14 +54,19 @@ jobs:
           -backend-config="access_key"=$BACKEND_ACCESS_KEY
 
       - name: Terraform Validate
-        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        # ensures that terraform validate runs regardless of the success or failure of the previous step
+        if: success() || failure()
         run: terraform validate
+        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
 
       - name: Terraform Plan
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
-        run: terraform plan
+        # secrets.TFVARS_CONTENT contains base64 encrypted local customer.tfvars
+        run: |
+          echo "${{ secrets.TFVARS_CONTENT }}" | base64 -d > terraform.tfvars
+          terraform plan -var-file="terraform.tfvars" -out="plan_customer.out"
 
       - name: Terraform Apply
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve
+        run: terraform apply "plan_customer.out"
