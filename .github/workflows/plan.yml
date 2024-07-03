@@ -1,4 +1,4 @@
-name: Terraform CI/CD Example
+name: Generate Terraform Plan
 
 on:
   workflow_dispatch:
@@ -6,9 +6,9 @@ on:
       customer:
         description: Choose customer workspace
         required: true
-        default: "SOFTIP"
+        default: "softip"
         type: choice # creates drop down menu
-        options: ["SOFTIP", "SLSP", "CURIUM"] # check if it can be lower case or upper case
+        options: ["softip", "slsp", "curium"] # check if it can be lower case or upper case
 
 env:
   TERRAFORM_WORKING_DIRECTORY: src/terraform
@@ -21,6 +21,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
+
+    environment:
+      name: staging
 
     steps:
       - name: Checkout
@@ -68,6 +71,16 @@ jobs:
 
       - name: Initialize Terraform Workspace
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+
+        # By default, in a script, if a command fails, the script will stop executing immediately.
+        # Disabling this behavior is important here because the script attempts to select a Terraform workspace,
+        # and if the workspace does not exist, it will attempt to create it.
+
+        # ||: This is a logical OR operator in shell scripting. It allows the second command to execute if the first command fails.
+
+        # Disabling and re-enabling set -e ensures that the script does not fail prematurely when trying to
+        # select a non-existent workspace. Instead, it gracefully handles the situation by creating the workspace if needed.
+
         run: |
           set +e  # Disable exit on error temporarily
           terraform workspace select ${{github.event.inputs.customer}} || terraform workspace new ${{github.event.inputs.customer}}
@@ -77,7 +90,10 @@ jobs:
 
       - name: Generate and Use .tfvars File
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+
         # secrets.TFVARS_CONTENT contains local **.tfvars file, which is gitignored
+        # base64 -d decoded the contents of specified file into the terraform.tfvars file
+
         run: |
           echo "${{ secrets.TFVARS_CONTENT }}" | base64 -d > terraform.tfvars
 
@@ -86,7 +102,8 @@ jobs:
         run: |
           terraform plan -out="plan_${{ github.event.inputs.customer }}.out" -var-file="terraform.tfvars"
 
-      - name: Terraform Apply
-        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
-        run: |
-          terraform apply "plan_${{ github.event.inputs.customer }}.out"
+      - name: Upload Plan File
+        uses: actions/upload-artifact@v3
+        with:
+          name: plan_${{ github.event.inputs.customer }}.out
+          path: plan_${{ github.event.inputs.customer }}.out

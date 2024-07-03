@@ -1,0 +1,48 @@
+name: Apply Terraform Plan
+
+on:
+  workflow_run:
+    workflows: ["Generate Terraform Plan"]
+    types:
+      - completed
+
+env:
+  TERRAFORM_WORKING_DIRECTORY: src/terraform
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    environment:
+      name: prod # Specify the environment which requires manual approval
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.5
+          terraform_wrapper: false
+
+      - name: Azure Login with OIDC
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      - name: Download Plan File
+        uses: actions/download-artifact@v3
+        with:
+          name: plan_${{ github.event.inputs.customer }}.out
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        run: |
+          terraform apply "plan_${{ github.event.inputs.customer }}.out"
