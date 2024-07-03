@@ -1,4 +1,4 @@
-name: Generate Terraform Plan
+name: Terraform CI/CD Example
 
 on:
   workflow_dispatch:
