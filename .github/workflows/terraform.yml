@@ -1,0 +1,17 @@
+name: Terraform CI/CD Example
+
+on:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "./"
+      - ".github/workflows/**"
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    name: Checkout
+    steps:
+      - uses: actions/checkout@v3
