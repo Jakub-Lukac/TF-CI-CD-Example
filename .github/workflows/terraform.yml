@@ -1,12 +1,14 @@
 name: Terraform CI/CD Example
 
 on:
-  push:
-    branches:
-      - "main"
-    paths:
-      - "src/terraform/**"
-      - ".github/workflows/**"
+  workflow_dispatch:
+    inputs:
+      customer:
+        description: Choose customer workspace
+        required: true
+        default: "softip"
+        type: choice # creates drop down menu
+        options: ["softip", "slsp", "curium"] # check if it can be lower case or upper case
 
 env:
   TERRAFORM_WORKING_DIRECTORY: src/terraform
@@ -63,7 +65,7 @@ jobs:
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: |
           set +e  # Disable exit on error temporarily
-          terraform workspace select customer || terraform workspace new customer
+          terraform workspace select ${{github.event.inputs.customer}} || terraform workspace new ${{github.event.inputs.customer}}
           workspace_name=$(terraform workspace show)
           echo "Current workspace: $workspace_name"
           set -e  # Re-enable exit on error
@@ -72,14 +74,16 @@ jobs:
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         # secrets.TFVARS_CONTENT contains local customer.tfvars file, which is gitignored
         run: |
-          echo "${{ secrets.TFVARS_CONTENT }}" | base64 -d > terraform.tfvars
+          customer_secret="secrets.${{ github.event.inputs.customer }}_TFVARS_CONTENT"
+          secret_value=$(echo "${customer_secret}" | base64 -d)
+          echo "$secret_value" > terraform.tfvars
 
       - name: Terraform Plan
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: |
-          terraform plan -out="plan_customer.out" -var-file="terraform.tfvars"
+          terraform plan -out="plan_${{ github.event.inputs.customer }}.out" -var-file="terraform.tfvars"
 
       - name: Terraform Apply
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: |
-            terraform apply "plan_customer.out"
+          terraform apply "plan_${{ github.event.inputs.customer }}.out"
