@@ -12,6 +12,23 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    name: Checkout
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.5
+          terraform_wrapper: false
+
+      # logging in through the service principal credentials
+      - name: Azure CLI Login
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ENV_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ENV_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.ENV_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ENV_SUBSCRIPTION_ID }}
+        run: |
+          az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID --output none
+          az account set -s $ARM_SUBSCRIPTION_ID --output none
