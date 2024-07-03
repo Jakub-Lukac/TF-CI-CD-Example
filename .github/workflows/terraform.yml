@@ -61,6 +61,11 @@ jobs:
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: terraform validate
 
+      - name: Terraform Current Workspace List
+        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        run: |
+          terraform workspace list
+
       - name: Initialize Terraform Workspace
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: |
@@ -72,7 +77,7 @@ jobs:
 
       - name: Generate and Use .tfvars File
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
-        # secrets.TFVARS_CONTENT contains local customer.tfvars file, which is gitignored
+        # secrets.TFVARS_CONTENT contains local **.tfvars file, which is gitignored
         run: |
           echo "${{ secrets.TFVARS_CONTENT }}" | base64 -d > terraform.tfvars
 
