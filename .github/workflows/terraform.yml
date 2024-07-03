@@ -147,6 +147,4 @@ jobs:
       - name: Terraform Apply
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: |
-          # Ensure the provider binaries are executable
-          chmod -R +x .terraform
           terraform apply "plan_${{ github.event.inputs.customer }}.out"
