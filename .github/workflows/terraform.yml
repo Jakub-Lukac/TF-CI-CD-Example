@@ -58,6 +58,8 @@ jobs:
           -backend-config="key=$TF_BACKEND_KEY" \
           -backend-config="access_key"=$BACKEND_ACCESS_KEY
 
+          chmod -R +x .terraform
+
       - name: Terraform Validate
         # ensures that terraform validate runs regardless of the success or failure of the previous step
         if: success() || failure()
@@ -106,7 +108,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: plan_${{ github.event.inputs.customer }}.out
-          path: ${{ env.TERRAFORM_WORKING_DIRECTORY }}/
+          path: ${{ env.TERRAFORM_WORKING_DIRECTORY }}/plan_${{ github.event.inputs.customer }}.out
 
   terraform_apply:
     needs: [terraform_plan]
@@ -145,4 +147,6 @@ jobs:
       - name: Terraform Apply
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: |
+          # Ensure the provider binaries are executable
+          chmod -R +x .terraform
           terraform apply "plan_${{ github.event.inputs.customer }}.out"
