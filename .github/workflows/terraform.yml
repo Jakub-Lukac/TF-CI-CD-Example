@@ -26,6 +26,7 @@ jobs:
           terraform_version: 1.5.5
           terraform_wrapper: false
 
+          
       - name: Azure CLI Login
         env:
           ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
