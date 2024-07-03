@@ -6,9 +6,9 @@ on:
       customer:
         description: Choose customer workspace
         required: true
-        default: "softip"
+        default: "SOFTIP"
         type: choice # creates drop down menu
-        options: ["softip", "slsp", "curium"] # check if it can be lower case or upper case
+        options: ["SOFTIP", "SLSP", "CURIUM"] # check if it can be lower case or upper case
 
 env:
   TERRAFORM_WORKING_DIRECTORY: src/terraform
@@ -75,7 +75,7 @@ jobs:
         # secrets.TFVARS_CONTENT contains local customer.tfvars file, which is gitignored
         run: |
           customer_secret="secrets.${{ github.event.inputs.customer }}_TFVARS_CONTENT"
-          secret_value=$(echo "${customer_secret}" | base64 -d)
+          secret_value=$(echo "$customer_secret" | base64 -d)
           echo "$secret_value" > terraform.tfvars
 
       - name: Terraform Plan
