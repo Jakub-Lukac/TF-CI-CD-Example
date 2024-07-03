@@ -74,9 +74,9 @@ jobs:
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         # secrets.TFVARS_CONTENT contains local customer.tfvars file, which is gitignored
         run: |
-          customer_secret="secrets.${{ github.event.inputs.customer }}_TFVARS_CONTENT"
-          secret_value=$(echo "$customer_secret" | base64 -d)
-          echo "$secret_value" > terraform.tfvars
+          customer_secret=secrets.${{ github.event.inputs.customer }}_TFVARS_CONTENT
+          secret_value=$(echo $customer_secret | base64 -d)
+          echo $secret_value > terraform.tfvars
 
       - name: Terraform Plan
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
