@@ -59,21 +59,22 @@ jobs:
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: terraform validate
 
-      - name: Terraform Workspace
+      - name: Initialize Terraform Workspace
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
-        run: |  
+        run: |
           set +e  # Disable exit on error temporarily
           terraform workspace select customer || terraform workspace new customer
+          workspace_name=$(terraform workspace show)
+          echo "Current workspace: $workspace_name"
           set -e  # Re-enable exit on error
+
+      - name: Generate and Use .tfvars File
+        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        # secrets.TFVARS_CONTENT contains local customer.tfvars file, which is gitignored
+        run: |
+          echo "${{ secrets.TFVARS_CONTENT }}" | base64 -d > terraform.tfvars
 
       - name: Terraform Plan
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
-        # secrets.TFVARS_CONTENT contains base64 encrypted local customer.tfvars
         run: |
-          echo "${{ secrets.TFVARS_CONTENT }}" | base64 -d > terraform.tfvars
-          terraform plan -var-file="terraform.tfvars" -out="plan_customer.out"
-
-      - name: Terraform Apply
-        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
-        if: github.ref == 'refs/heads/main'
-        run: terraform apply "plan_customer.out"
+          terraform plan -out="plan_customer.out" -var-file="terraform.tfvars"
