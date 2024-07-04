@@ -6,7 +6,7 @@ on:
       customer:
         description: Choose customer workspace
         required: true
-        default: "softip"
+        default: "softip" # has to match one of the options specified below
         type: choice # creates drop down menu
         options: ["softip", "slsp", "curium"] # check if it can be lower case or upper case
 
@@ -17,13 +17,13 @@ jobs:
   terraform_plan:
     runs-on: ubuntu-latest
 
-    # Permissions for OIDC
+    # Permissions for OIDC - need of setting up Federate Credential for staging environment in App Registration
     permissions:
       id-token: write
       contents: read
 
     environment:
-      name: staging
+      name: staging # GitHub environment (navigate to the repository Settings)
 
     steps:
       - name: Checkout
@@ -72,6 +72,7 @@ jobs:
       - name: Initialize Terraform Workspace
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
 
+        # set +e:
         # By default, in a script, if a command fails, the script will stop executing immediately.
         # Disabling this behavior is important here because the script attempts to select a Terraform workspace,
         # and if the workspace does not exist, it will attempt to create it.
@@ -91,17 +92,19 @@ jobs:
       - name: Generate and Use .tfvars File
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
 
-        # secrets.TFVARS_CONTENT contains local **.tfvars file, which is gitignored
-        # base64 -d decoded the contents of specified file into the terraform.tfvars file
+        # secrets.TFVARS_CONTENT contains local **.tfvars file, it is best-practise to ignore .tfvars files as they
+        # can hold sensitive information
+        # base64 -d decodes the contents of specified file into the github.event.inputs.customer.tfvars file
 
         run: |
-          echo "${{ secrets.TFVARS_CONTENT }}" | base64 -d > terraform.tfvars
+          echo "${{ secrets.TFVARS_CONTENT }}" | base64 -d > ${{ github.event.inputs.customer }}.tfvars
 
       - name: Terraform Plan
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: |
-          terraform plan -out="plan_${{ github.event.inputs.customer }}.out" -var-file="terraform.tfvars"
+          terraform plan -out="plan_${{ github.event.inputs.customer }}.out" -var-file="${{ github.event.inputs.customer }}.tfvars"
 
+        # Uploads the .out file to terraform working directory
       - name: Upload Plan File
         uses: actions/upload-artifact@v3
         with:
@@ -112,6 +115,7 @@ jobs:
     needs: [terraform_plan]
     runs-on: ubuntu-latest
 
+    # Permissions for OIDC - need of setting up Federate Credential for prod environment in App Registration
     permissions:
       id-token: write
       contents: read
@@ -136,6 +140,7 @@ jobs:
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
           subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
+        # Initialize Terraform once to again to load previous state
       - name: Initialize Terraform
         env:
           BACKEND_RESOURCE_GROUP_NAME: ${{secrets.BACKEND_RESOURCE_GROUP_NAME}}
@@ -164,6 +169,10 @@ jobs:
 
       - name: Initialize Terraform Workspace
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+
+        # no need to check whether the workspace is crated or not, because this was already done
+        # in the terraform_plan job
+
         run: |
           terraform workspace select ${{github.event.inputs.customer}}
 
