@@ -8,6 +8,16 @@ This Demo project demostrates how to `use one IaC (Infrastructure as Code) for m
 
 ## Azure Portal
 
+Navigate to Azure Portal -> Entra ID (AAD) -> App Registration -> Create or use an existing app -> `Certificates & Secrets -> Federate Credentials` -> Create 3 Credentials (branch-main, environemt-staging, environment-prod).
+
+As a scenario select `GitHub Actions deploying Azure resources`, Organization is the name of the GitHub account. Then fill the rest of the fields. As for the credential name selecet whatever means your organization naming standards.
+
+```text
+oidc-8118741            repo:Jakub-Lukac/TF-CI-CD-Example:ref:refs/heads/main
+oidc-staging-987789     repo:Jakub-Lukac/TF-CI-CD-Example:environment:staging
+oidc-prod-987789        repo:Jakub-Lukac/TF-CI-CD-Example:environment:prod
+```
+
 # CI/CD pipeline Setup
 
 ## GitHub Secrets
