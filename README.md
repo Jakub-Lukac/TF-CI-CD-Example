@@ -46,7 +46,19 @@ BACKEND_ACCESS_KEY
 
 ## Pipeline Overview
 
-The CI/CD pipeline takes advantage of built-in feature of GitHub Actions to specify `inputs for the workflow`. Each input represents a single customer. Based on this input parameter the `corresponding .tfvars, .out files` are used. Additionally, the `corresponding workspace` is selected, **if the workspace does not exists yet, then it is created.**
+The CI/CD pipeline takes advantage of built-in feature of GitHub Actions to specify `inputs for the workflow`. Each input represents a single customer. Based on this input parameter the `corresponding .tfvars, .out files` are used. Additionally, the `corresponding workspace` is selected, **if the workspace does not exists yet, then it is created.** Important to highlight is that the pipeline is run manually using the `workflow_dispatch`.
+
+```text
+on:
+  workflow_dispatch:
+    inputs:
+      customer:
+        description: Choose customer workspace
+        required: true
+        default: "softip" # has to match one of the options specified below
+        type: choice # creates drop down menu
+        options: ["softip", "slsp", "curium"] # softip != SOFTIP
+```
 
 ## GitHub repository environemts
 

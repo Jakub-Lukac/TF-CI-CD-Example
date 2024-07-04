@@ -8,7 +8,7 @@ on:
         required: true
         default: "softip" # has to match one of the options specified below
         type: choice # creates drop down menu
-        options: ["softip", "slsp", "curium"] # check if it can be lower case or upper case
+        options: ["softip", "slsp", "curium"] # softip != SOFTIP
 
 env:
   TERRAFORM_WORKING_DIRECTORY: src/terraform
