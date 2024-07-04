@@ -94,6 +94,7 @@ jobs:
 
         # secrets.TFVARS_CONTENT contains local **.tfvars file, it is best-practise to ignore .tfvars files as they
         # can hold sensitive information
+
         # base64 -d decodes the contents of specified file into the github.event.inputs.customer.tfvars file
 
         run: |
