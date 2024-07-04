@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This Demo project demostrates how to use one IaC (Infrastructure as Code) for multiple customers and automate it using CI/CD pipeline. Part of the project is also use of OIDC (Open ID Connect) method to login to Azure portal.
+This Demo project demostrates how to `use one IaC (Infrastructure as Code) for multiple customers` and automate it using CI/CD pipeline. Part of the project is also use of `OIDC (Open ID Connect)` method to login to Azure portal.
 
 # OIDC Setup
 
@@ -36,4 +36,8 @@ BACKEND_ACCESS_KEY
 
 ## Pipeline Overview
 
-The CI/CD pipeline takes advantage of built-in feature of GitHub Actions to specify inputs for the workflow. Each input represents a single customer. Based on this input parameter the corresponding .tfvars, .out files are used. Additionally, the corresponding workspace is created.
+The CI/CD pipeline takes advantage of built-in feature of GitHub Actions to specify `inputs for the workflow`. Each input represents a single customer. Based on this input parameter the `corresponding .tfvars, .out files` are used. Additionally, the `corresponding workspace` is selected, **if the workspace does not exists yet, then it is created.**
+
+## GitHub repository environemts
+
+The CI/CD Pipeline consits of two jobs, `terraform_plan` and `terraform_apply`, each run in different environment. `terraform_plan` runs in the `staging` environemt, and `terraform_apply` runs in the `prod` environemt. The `prod` environment has been assigned protection rule **(Only the designated reviewer can run the job)**. The purpose of this step is to ensure that the reviewer checks if `terraform_plan` outputs expected plan and then applies it inside the `terraform_apply`.
