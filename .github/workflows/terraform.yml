@@ -152,6 +152,11 @@ jobs:
           -backend-config="key=$TF_BACKEND_KEY" \
           -backend-config="access_key"=$BACKEND_ACCESS_KEY
 
+      - name: Terraform Validate
+        if: success() || failure()
+        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        run: terraform validate
+
       - name: Terraform Current Workspace List
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: |
