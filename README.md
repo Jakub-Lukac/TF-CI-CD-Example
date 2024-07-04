@@ -18,7 +18,7 @@ oidc-staging-987789     repo:Jakub-Lukac/TF-CI-CD-Example:environment:staging
 oidc-prod-987789        repo:Jakub-Lukac/TF-CI-CD-Example:environment:prod
 ```
 
-# CI/CD pipeline Setup
+# CI/CD Pipeline Setup
 
 ## GitHub Secrets
 
