@@ -58,6 +58,9 @@ jobs:
           -backend-config="key=$TF_BACKEND_KEY" \
           -backend-config="access_key"=$BACKEND_ACCESS_KEY
 
+      - name: Set Exec for Binaries
+        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        run: |
           chmod -R +x .terraform
 
       - name: Terraform Validate
@@ -137,6 +140,11 @@ jobs:
           client-id: ${{ secrets.ARM_CLIENT_ID }}
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
           subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      - name: Terraform Current Workspace List
+        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        run: |
+          terraform workspace list
 
       - name: Download Plan File
         uses: actions/download-artifact@v3
