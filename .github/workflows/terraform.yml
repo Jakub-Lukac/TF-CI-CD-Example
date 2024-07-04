@@ -58,11 +58,6 @@ jobs:
           -backend-config="key=$TF_BACKEND_KEY" \
           -backend-config="access_key"=$BACKEND_ACCESS_KEY
 
-      - name: Set Exec for Binaries
-        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
-        run: |
-          chmod -R +x .terraform
-
       - name: Terraform Validate
         # ensures that terraform validate runs regardless of the success or failure of the previous step
         if: success() || failure()
@@ -156,11 +151,16 @@ jobs:
           -backend-config="container_name=$BACKEND_STORAGE_CONTAINER_NAME" \
           -backend-config="key=$TF_BACKEND_KEY" \
           -backend-config="access_key"=$BACKEND_ACCESS_KEY
-          
+
       - name: Terraform Current Workspace List
         working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
         run: |
           terraform workspace list
+
+      - name: Initialize Terraform Workspace
+        working-directory: ${{ env.TERRAFORM_WORKING_DIRECTORY }}
+        run: |
+          terraform workspace select ${{github.event.inputs.customer}}
 
       - name: Download Plan File
         uses: actions/download-artifact@v3
